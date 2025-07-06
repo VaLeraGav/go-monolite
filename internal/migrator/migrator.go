@@ -24,7 +24,7 @@ var (
 )
 
 type Migrator struct {
-	srcDriver    source.Driver
+	moduleDriver source.Driver
 	databaseName string
 	db           *sql.DB
 }
@@ -35,7 +35,7 @@ func MustGetNewMigrator(databaseName string, db *sql.DB) *Migrator {
 		panic(err)
 	}
 	return &Migrator{
-		srcDriver:    d,
+		moduleDriver: d,
 		databaseName: databaseName,
 		db:           db,
 	}
@@ -85,13 +85,13 @@ func (m *Migrator) newMigrator(db *sql.DB) (*migrate.Migrate, error) {
 		return nil, fmt.Errorf("unable to create db instance: %w", err)
 	}
 
-	return migrate.NewWithInstance("migration_embeded_sql_files", m.srcDriver, m.databaseName, driver)
+	return migrate.NewWithInstance("migration_embeded_sql_files", m.moduleDriver, m.databaseName, driver)
 }
 
 func (m *Migrator) closeQuietly(migrator *migrate.Migrate) {
-	srcErr, dbErr := migrator.Close()
-	if srcErr != nil {
-		logger.Warn(srcErr, "error closing migration source")
+	moduleErr, dbErr := migrator.Close()
+	if moduleErr != nil {
+		logger.Warn(moduleErr, "error closing migration source")
 	}
 	if dbErr != nil {
 		logger.Warn(dbErr, "error closing migration database")
@@ -119,7 +119,7 @@ func (m *Migrator) Run(action string) (string, error) {
 	}
 }
 
-// base := "internal/src"
+// base := "internal/module"
 
 // err := filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
 // 	if err != nil {

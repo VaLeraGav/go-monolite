@@ -2,7 +2,7 @@ package category_test
 
 import (
 	"fmt"
-	"go-monolite/internal/src/category"
+	"go-monolite/internal/module/category"
 	"go-monolite/pkg/respond"
 	"go-monolite/pkg/testinit"
 	"net/http"

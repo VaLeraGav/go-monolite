@@ -1,7 +1,7 @@
 package product_test
 
 // import (
-// 	"go-monolite/internal/src/product"
+// 	"go-monolite/internal/module/product"
 // 	"go-monolite/pkg/testinit"
 // 	"testing"
 // )

@@ -1,8 +1,8 @@
-package price_test
+package storage_test
 
 import (
 	"fmt"
-	"go-monolite/internal/src/price"
+	"go-monolite/internal/module/storage"
 	"go-monolite/pkg/respond"
 	"go-monolite/pkg/testinit"
 	"net/http"
@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestPriceIntegration(t *testing.T) {
+func TestStorageIntegration(t *testing.T) {
 	store := testinit.SetupStoreTest(t)
-	handler := price.NewHandler(store)
+	handler := storage.NewHandler(store)
 	server := testinit.SetupTestServer(t, handler)
 	defer server.Close()
 
@@ -23,28 +23,28 @@ func TestPriceIntegration(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	const typePriceUUID1 = "a1111111-b222-c333-d444-e55555555555"
-	const typePriceUUID2 = "f6666666-7777-8888-9999-aaaaaaaaaaaa"
-	const typePriceUUID3 = "f6666666-7777-8888-7777-aaaaaaaaaaaa"
+	const storageUUID1 = "a1111111-b222-c333-d444-e55555555555"
+	const storageUUID2 = "f6666666-7777-8888-9999-aaaaaaaaaaaa"
+	const storageUUID3 = "f6666666-7777-8888-7777-aaaaaaaaaaaa"
 	const productUUID1 = "123e4567-e89b-12d3-a456-426614174000"
 	const productUUID2 = "123e4567-e89b-12d3-a456-426614174001"
 
 	validUpsertJSON := fmt.Sprintf(`{
 		"general": {
-			"prices": [
+			"storages": [
 				{
 					"uuid": "%s",
-					"name": "Розничная цена",
+					"name": "SPB",
 					"active": "Y"
 				},
 				{
 					"uuid": "%s",
-					"name": "Оптовая цена",
+					"name": "Backup Warehouse",
 					"active": "Y"
 				},
 				{
 					"uuid": "%s",
-					"name": "Специальная цена",
+					"name": "Backup HH",
 					"active": "Y"
 				}
 			]
@@ -52,48 +52,48 @@ func TestPriceIntegration(t *testing.T) {
 		"data": [
 			{
 				"product_uuid": "%s",
-				"prices": [
+				"storages": [
 					{
-						"type_price_uuid": "%s",
+						"storage_uuid": "%s",
 						"active": "Y",
-						"price": 1000.50
+						"quantity": 100
 					},
 					{
-						"type_price_uuid": "%s",
+						"storage_uuid": "%s",
 						"active": "Y",
-						"price": 800.25
+						"quantity": 0
 					},
 					{
-						"type_price_uuid": "%s",
+						"storage_uuid": "%s",
 						"active": "Y",
-						"price": 900.75
+						"quantity": 22
 					}
 				]
 			},
 			{
 				"product_uuid": "%s",
-				"prices": [
+				"storages": [
 					{
-						"type_price_uuid": "%s",
+						"storage_uuid": "%s",
 						"active": "Y",
-						"price": 2000.50
+						"quantity": 50
 					},
 					{
-						"type_price_uuid": "%s",
+						"storage_uuid": "%s",
 						"active": "Y",
-						"price": 1500.25
+						"quantity": 23
 					}
 				]
 			}
 		]
-	}`, typePriceUUID1, typePriceUUID2, typePriceUUID3, productUUID1, typePriceUUID1, typePriceUUID2, typePriceUUID3, productUUID2, typePriceUUID1, typePriceUUID2)
+	}`, storageUUID1, storageUUID2, storageUUID3, productUUID1, storageUUID1, storageUUID2, storageUUID3, productUUID2, storageUUID1, storageUUID2)
 
-	t.Run("Create Price Validation Error", func(t *testing.T) {
+	t.Run("Create Storage Validation Error", func(t *testing.T) {
 		invalidJSON := `{
 			"general": {
-				"prices": [
+				"storages": [
 					{
-						"name": "Цена без UUID",
+						"name": "Склад без UUID",
 						"active": "Y"
 					}
 				]
@@ -116,19 +116,19 @@ func TestPriceIntegration(t *testing.T) {
 		assert.Equal(t, "Поле uuid обязательно для заполнения", errResp.Errors["uuid"])
 	})
 
-	t.Run("Upsert Price and Product Price", func(t *testing.T) {
+	t.Run("Upsert Storage and Product Storage", func(t *testing.T) {
 		resp := testinit.SendRequest(t, server.URL+"/upsert", "POST", validUpsertJSON)
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
 		var response respond.Response
 		testinit.DecodeJSON(t, resp.Body, &response)
 
-		var priceResp price.UpsertResponse
-		testinit.MarshalUnmarshal(t, response.Data, &priceResp)
+		var storageResp storage.UpsertResponse
+		testinit.MarshalUnmarshal(t, response.Data, &storageResp)
 
-		assert.NotNil(t, priceResp.ProductPrice)
-		assert.NotNil(t, priceResp.TypePrice)
-		assert.Equal(t, 5, priceResp.ProductPrice.CountInserted)
-		assert.Equal(t, 3, priceResp.TypePrice.CountInserted)
+		assert.NotNil(t, storageResp.Storage)
+		assert.NotNil(t, storageResp.ProductStorage)
+		assert.Equal(t, 3, storageResp.Storage.CountInserted)
+		assert.Equal(t, 5, storageResp.ProductStorage.CountInserted)
 	})
 }
