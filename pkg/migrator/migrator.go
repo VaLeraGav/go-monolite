@@ -75,7 +75,7 @@ func New(migrationsDir, dbName string, db *sql.DB) (*Migrator, error) {
 
 // Run performs Up and Down
 func (m *Migrator) Run(action string) (string, error) {
-	defer m.Close()
+	defer m.CloseAndLog()
 
 	var err error
 	switch action {
@@ -122,6 +122,8 @@ func (m *Migrator) CreateMigration(modulePath, name string) error {
 }
 
 func (m *Migrator) Version() error {
+	defer m.CloseAndLog()
+
 	version, dirty, err := m.migrate.Version()
 	if err != nil {
 		if err == migrate.ErrNilVersion {
@@ -131,6 +133,12 @@ func (m *Migrator) Version() error {
 	}
 	fmt.Printf("Current migration version: %d, dirty: %v\n", version, dirty)
 	return nil
+}
+
+func (m *Migrator) CloseAndLog() {
+	if err := m.Close(); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: failed to close migrator: %v\n", err)
+	}
 }
 
 func (m *Migrator) Close() error {
