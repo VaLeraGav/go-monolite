@@ -1,0 +1,79 @@
+services:
+
+  golang:
+    container_name: go-monolite_service
+    image: golang:1.24-alpine
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: make init-docker
+    environment:
+      - TZ=Europe/Moscow  
+    ports:
+      - "${HTTP_SERVER_HOST}:${HTTP_SERVER_PORT}:${HTTP_SERVER_PORT}"
+    depends_on:
+      - postgres
+    networks:
+      - go-monolite_network
+
+  backup:
+    build:
+      context: .
+      dockerfile: docker/backup/Dockerfile
+    container_name: go-monolite_backup
+    environment:
+      PGHOST: postgres
+      PGUSER: ${DB_USER}
+      PGPASSWORD: ${DB_PASSWORD}
+      PGDATABASE: ${DB_NAME}
+    volumes:
+      - ./script:/scripts
+      - ./backups:/backups
+    depends_on:
+      - postgres
+    networks:
+      - go-monolite_network
+
+  postgres:
+    image: postgres:16.1-alpine3.18
+    privileged: false
+    container_name: go-monolite_postgresql
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - .:/docker-entrypoint-initdb.d
+      - go-monolite_pgdata:/var/lib/postgresql/data
+    ports:
+      - ${DB_EXTERNAL_PORT}:${DB_INTERNAL_PORT}
+    networks:
+      - go-monolite_network
+
+  postgres_test:
+    image: postgres:16.1-alpine3.18
+    container_name: go-monolite_postgresql_test
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./docker/test-init:/docker-entrypoint-initdb.d
+      - go-monolite_pgdata_test:/var/lib/postgresql/data
+    ports:
+      - ${TEST_DB_EXTERNAL_PORT}:${DB_INTERNAL_PORT}
+    networks:
+      - go-monolite_network
+
+volumes:
+  go-monolite_pgdata:
+  go-monolite_pgdata_test:
+
+networks:
+  go-monolite_network:
+    # ipam:
+    #   config:
+    #     - subnet: ${DOCKER_NET_IAM}
