@@ -180,6 +180,7 @@ func Warn(err error, msg string, keyValues ...any) {
 func Fatal(err error, msg string, keyValues ...any) {
 	event := globalLog.Logger.Fatal().Err(err)
 	globalLog.addFields(event, keyValues...).Msg(msg)
+	os.Exit(1)
 }
 
 func WithLogger(ctx context.Context) context.Context {

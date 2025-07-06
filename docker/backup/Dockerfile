@@ -2,10 +2,9 @@ FROM postgres:16.1
 
 RUN apt-get update && apt-get install -y cron tzdata && apt-get clean
 
-COPY script/backup.sh /backup.sh
-RUN chmod +x /backup.sh
-
-RUN chmod +x /backup.sh /restore_latest.sh
+# COPY script/backup.sh script/backup.sh
+# RUN chmod +x /script/backup.sh
+# RUN chmod +x /script/restore_latest.sh
 
 RUN touch /var/log/backup.log
 

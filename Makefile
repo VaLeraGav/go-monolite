@@ -25,7 +25,6 @@ swagger-init:
 ## fast-start: quick launch of ms_delivery
 .PHONY: fast-start
 fast-start:
-	go run cmd/migration/main.go -action=up
 	go run cmd/$(PROJECT_NAME)/main.go
 
 ## start: build start of $(PROJECT_NAME)
@@ -43,6 +42,20 @@ migration-up:
 .PHONY: migration-down
 migration-down:
 	go run cmd/migration/main.go -action=down
+
+## migration-down: down the migration with the database
+.PHONY: migration-version
+migration-version:
+	go run cmd/migration/main.go -action=version
+
+## migration-create: create the migration with the database
+.PHONY: migration-create
+migration-create:
+	@if [ -z "$(modulePath)" ] || [ -z "$(name)" ]; then \
+		echo "Usage: make migration-create modulePath=some_dir name=add_users_table"; \
+		exit 1; \
+	fi
+	go run cmd/migration/main.go -action=create -modulePath=$(modulePath) -name='$(name)'
 
 ## build: build a project
 .PHONY: build

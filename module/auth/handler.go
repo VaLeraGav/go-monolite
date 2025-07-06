@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"go-monolite/internal/module/user"
 	"go-monolite/internal/store"
+	"go-monolite/module/user"
 	"go-monolite/pkg/helper"
 	"go-monolite/pkg/logger"
 	"go-monolite/pkg/respond"

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"go-monolite/internal/infra/sender"
-	"go-monolite/internal/module/user"
 	"go-monolite/internal/store"
+	"go-monolite/module/user"
 	"go-monolite/pkg/helper"
 	"time"
 )

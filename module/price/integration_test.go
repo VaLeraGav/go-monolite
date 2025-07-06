@@ -2,7 +2,8 @@ package price_test
 
 import (
 	"fmt"
-	"go-monolite/internal/module/price"
+
+	"go-monolite/module/price"
 	"go-monolite/pkg/respond"
 	"go-monolite/pkg/testinit"
 	"net/http"

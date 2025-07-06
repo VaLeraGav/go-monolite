@@ -38,11 +38,11 @@ func ConfigureLogger(env string, logPath string) zerolog.Logger {
 
 	case EnvDev:
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-		logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+		logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: timeFormat})
 
 	case EnvProd:
 		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
-		logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, NoColor: true})
+		logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: timeFormat, NoColor: true})
 
 	default:
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)

@@ -9,7 +9,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app
-    command: make init-docker
+    # command: make init-docker
     environment:
       - TZ=Europe/Moscow  
     ports:
@@ -30,7 +30,7 @@ services:
       PGPASSWORD: ${DB_PASSWORD}
       PGDATABASE: ${DB_NAME}
     volumes:
-      - ./script:/scripts
+      - ./script:/script
       - ./backups:/backups
     depends_on:
       - postgres

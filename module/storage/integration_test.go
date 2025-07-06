@@ -2,7 +2,8 @@ package storage_test
 
 import (
 	"fmt"
-	"go-monolite/internal/module/storage"
+
+	"go-monolite/module/storage"
 	"go-monolite/pkg/respond"
 	"go-monolite/pkg/testinit"
 	"net/http"

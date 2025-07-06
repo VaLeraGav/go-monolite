@@ -1,13 +1,13 @@
 package server
 
 import (
-	"go-monolite/internal/module/auth"
-	"go-monolite/internal/module/category"
-	"go-monolite/internal/module/price"
-	"go-monolite/internal/module/product"
-	"go-monolite/internal/module/property"
-	"go-monolite/internal/module/storage"
-	"go-monolite/internal/module/user"
+	"go-monolite/module/auth"
+	"go-monolite/module/category"
+	"go-monolite/module/price"
+	"go-monolite/module/product"
+	"go-monolite/module/property"
+	"go-monolite/module/storage"
+	"go-monolite/module/user"
 	"go-monolite/pkg/logger"
 	"go-monolite/pkg/middleware/cors"
 	middlewareLogger "go-monolite/pkg/middleware/logger"
