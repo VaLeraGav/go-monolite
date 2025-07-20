@@ -1,12 +1,11 @@
 package validator
 
 import (
-	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 )
 
 type ValidationError struct {
@@ -27,89 +26,87 @@ func init() {
 	}
 }
 
-func initCustomValidPatterns() error {
-	if err := validatorIns.RegisterValidation("phone", createValidPhone); err != nil {
-		return err
-	}
-
-	if err := validatorIns.RegisterValidation("auth_password", createValidPasswordPattern); err != nil {
-		return err
-	}
-
-	if err := validatorIns.RegisterValidation("auth_password", createValidPasswordPattern); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func CompareFields(f1 any, f2 any, tag string) error {
 	return validatorIns.VarWithValue(f1, f2, tag)
 }
 
-func Validate(dto any, tagMessages map[string]string) error {
+func Validate(dto any) error {
+	return ValidateWithMessages(dto, map[string]string{})
+}
+
+func ValidateWithMessages(dto any, tagMessages map[string]string) error {
 	err := validatorIns.Struct(dto)
+	if err == nil {
+		return nil
+	}
 
 	validationErrors, ok := err.(validator.ValidationErrors)
 	if !ok {
-		return nil
+		return err
 	}
 
 	ve := getErrorsMap(validationErrors, tagMessages)
-
 	if len(ve.Fields) == 0 {
 		return nil
 	}
+
 	return ve
 }
 
-func ParseUUID(uuidStr string) (uuid.UUID, error) {
-	if uuidStr == "" {
-		return uuid.UUID{}, errors.New("UUID не указан")
-	}
-
-	uuidParse, err := uuid.Parse(uuidStr)
-	if err != nil {
-		return uuid.UUID{}, errors.New("некорректный формат UUID")
-	}
-
-	return uuidParse, nil
-}
-
 func getErrorsMap(validationErrors validator.ValidationErrors, tagMessages map[string]string) ValidationError {
-	errs := make(map[string]string)
+	errors := make(map[string]string)
 
-	for _, fieldError := range validationErrors {
-		field := strings.ToLower(fieldError.Field())
+	for _, err := range validationErrors {
+		tag := err.Tag()
+		field := ToSnakeCase(err.Field())
 
-		if msg, exists := tagMessages[fieldError.Tag()]; exists {
-			errs[field] = "Поле " + field + " " + msg
-		} else {
-			errs[field] = "Поле " + field + " содержит ошибку валидации: " + fieldError.Tag()
+		msg, ok := tagMessages[tag]
+		if !ok {
+			msg = defaultErrorMessage(tag, field, err.Param())
 		}
+
+		errors[field] = msg
 	}
 
-	if len(errs) == 0 {
+	if len(errors) == 0 {
 		return ValidationError{}
 	}
 
-	return ValidationError{Err: validationErrors, Fields: errs}
+	return ValidationError{Err: validationErrors, Fields: errors}
 }
 
-func createValidPattern(fl validator.FieldLevel, pattern string) bool {
-	return regexp.MustCompile(pattern).MatchString(fl.Field().String())
+func defaultErrorMessage(tag, field, param string) string {
+	switch tag {
+	case "required":
+		return fmt.Sprintf("Поле %s обязательно для заполнения", field)
+	case "min":
+		return fmt.Sprintf("Поле %s должно быть не меньше %s", field, param)
+	case "max":
+		return fmt.Sprintf("Поле %s должно быть не больше %s", field, param)
+	case "email":
+		return fmt.Sprintf("Поле %s должно быть валидным email адресом", field)
+	case "gte":
+		return fmt.Sprintf("Поле %s должно быть больше или равно %s", field, param)
+	case "lte":
+		return fmt.Sprintf("Поле %s должно быть меньше или равно %s", field, param)
+	case "eqfield":
+		return fmt.Sprintf("Поле %s должно совпадать с другим полем", field)
+	case "oneof":
+		return fmt.Sprintf("Поле %s должно быть одним из следующих значений: %s", field, param)
+	case customFieldPhone:
+		return fmt.Sprintf("Поле %s неправильно передано номер телефона", field)
+	case customFieldAuthPassword:
+		return fmt.Sprintf("Поле %s неправильно пароль", field)
+	default:
+		return fmt.Sprintf("Поле %s не прошло проверку: %s", field, tag)
+	}
 }
 
-func createValidPasswordPattern(fl validator.FieldLevel) bool {
-	value := fl.Field().String()
+func ToSnakeCase(str string) string {
+	var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+	var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 
-	hasUppercase := regexp.MustCompile(`[A-Z]`).MatchString(value)
-	hasLowercase := regexp.MustCompile(`[a-z]`).MatchString(value)
-	hasDigit := regexp.MustCompile(`\d`).MatchString(value)
-
-	return hasUppercase && hasLowercase && hasDigit
-}
-
-func createValidPhone(fl validator.FieldLevel) bool {
-	return createValidPattern(fl, `^7\d{10}$`)
+	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	return strings.ToLower(snake)
 }

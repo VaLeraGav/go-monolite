@@ -41,11 +41,7 @@ func (v PropertyValueDto) ToEntity() *PropertyValueEnt {
 }
 
 func (d *PropertyValueDto) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-	}
-
-	return validator.Validate(d, tagMsg)
+	return validator.Validate(d)
 }
 
 type PropertyDto struct {
@@ -65,11 +61,7 @@ func (v PropertyDto) ToEntity() *PropertyEnt {
 }
 
 func (d *PropertyDto) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-	}
-
-	return validator.Validate(d, tagMsg)
+	return validator.Validate(d)
 }
 
 func ValidatePropertyDtos(pdtos []PropertyDto) error {

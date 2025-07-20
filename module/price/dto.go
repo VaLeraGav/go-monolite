@@ -57,11 +57,7 @@ type ProductPriceResponseDetails struct {
 }
 
 func (r *UpsertRequest) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-	}
-
-	if err := validator.Validate(r, tagMsg); err != nil {
+	if err := validator.Validate(r); err != nil {
 		return err
 	}
 
@@ -94,29 +90,15 @@ func (v TypePriceRequest) ToEntity() *TypePriceEnt {
 }
 
 func (d *TypePriceRequest) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-		"oneof":    "должно быть Y или N",
-	}
-
-	return validator.Validate(d, tagMsg)
+	return validator.Validate(d)
 }
 
 func (d *ProductPriceDto) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-	}
-
-	return validator.Validate(d, tagMsg)
+	return validator.Validate(d)
 }
 
 func (d *ProductPriceItemDto) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-		"oneof":    "должно быть Y или N",
-	}
-
-	return validator.Validate(d, tagMsg)
+	return validator.Validate(d)
 }
 
 func (d *ProductPriceItemDto) ToEntity() *ProductPriceEnt {

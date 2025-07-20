@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"os"
@@ -32,6 +33,9 @@ func PrettyPrint(v any) {
 func Unmarshal(data []byte, v any) (string, error) {
 	err := json.Unmarshal(data, v)
 	if err != nil {
+		if strings.Contains(err.Error(), "invalid UUID length") {
+			return "UUID имеет некорректную длину", err
+		}
 		return "Получен некорректный формат JSON", err
 	}
 	return "", nil

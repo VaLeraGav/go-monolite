@@ -50,19 +50,5 @@ func (p *ProductDto) ToEntity() *ProductEnt {
 }
 
 func (d *ProductDto) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-		"numeric":  "должно быть числом",
-		"oneofci":  "может быть одним из: Y или N",
-	}
-
-	return validator.Validate(d, tagMsg)
+	return validator.Validate(d)
 }
-
-// func ToProductResponseList(ents []ProductEnt) []ProductResponse {
-// 	res := make([]ProductResponse, 0, len(ents))
-// 	for _, ent := range ents {
-// 		res = append(res, *ToProductResponse(&ent))
-// 	}
-// 	return res
-// }

@@ -57,11 +57,7 @@ type ProductStorageUpsertStatsResponse struct {
 }
 
 func (r *UpsertRequest) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-	}
-
-	if err := validator.Validate(r, tagMsg); err != nil {
+	if err := validator.Validate(r); err != nil {
 		return err
 	}
 
@@ -88,26 +84,15 @@ func (r *UpsertRequest) Validate() error {
 }
 
 func (d *StorageDto) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-		"oneof":    "должно быть Y или N",
-	}
-	return validator.Validate(d, tagMsg)
+	return validator.Validate(d)
 }
 
 func (d *ProductStorageDto) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-	}
-	return validator.Validate(d, tagMsg)
+	return validator.Validate(d)
 }
 
 func (d *ProductStorageItemDto) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-		"oneof":    "должно быть Y или N",
-	}
-	return validator.Validate(d, tagMsg)
+	return validator.Validate(d)
 }
 
 func (v StorageDto) ToEntity() *StorageEnt {

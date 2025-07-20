@@ -40,12 +40,7 @@ func (c CategoryRequest) ToEntity() CategoryEnt {
 }
 
 func (c *CategoryRequest) Validate() error {
-	tagMsg := map[string]string{
-		"required": "обязательно для заполнения",
-		"oneof":    "может быть одним из: Y или N",
-	}
-
-	return validator.Validate(c, tagMsg)
+	return validator.Validate(c)
 }
 
 func (c CategoryRequest) GetKey() string {
