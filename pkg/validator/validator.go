@@ -53,6 +53,16 @@ func ValidateWithMessages(dto any, tagMessages map[string]string) error {
 	return ve
 }
 
+func ValidationMapRules(types ...any) {
+	rules := map[string]string{
+		"Name":   "required,min=2,max=50",
+		"Email":  "required,email",
+		"Age":    "required,min=18,max=120",
+		"Active": "required,oneof=Y N",
+	}
+	validatorIns.RegisterStructValidationMapRules(rules, types)
+}
+
 func getErrorsMap(validationErrors validator.ValidationErrors, tagMessages map[string]string) ValidationError {
 	errors := make(map[string]string)
 
